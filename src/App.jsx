@@ -1,35 +1,66 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ChakraProvider, Flex, Box } from '@chakra-ui/react';
+import { onAuthChange } from '../src/services/authService';
+import Navbar from '../src/components/Navbar/Navbar';
+import Footer from '../src/components/Footer/Footer';
+import HomePage from '../src/pages/HomePage/HomePage';
+import AuthForm from '../src/components/AuthForm/AuthForm';
+import AdminDashboard from '../src/components/AdminDashoard/AdminDashboard';
+import UserDashboard from '../src/components/UserDashboard/UserDashboard';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthChange((authUser) => {
+      if (authUser) {
+        setUser(authUser);
+      } else {
+        setUser(null);
+      }
+    });
+    return unsubscribe;
+  }, []);
+
+  const PrivateRoute = ({ children, allowedRoles }) => {
+    return user && allowedRoles.includes(user.role) ? children : <Navigate to="/login" />;
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <ChakraProvider>
+      <Router>
+        <Flex direction="column" minHeight="100vh" width="100%">
+          <Navbar />
+          <Box flex="1">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<AuthForm />} />
+              <Route
+                path="/admin"
+                element={
+                  <PrivateRoute allowedRoles={['admin']}>
+                    <AdminDashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/dashboard"
+                element={
+                  <PrivateRoute allowedRoles={['user', 'admin']}>
+                    <UserDashboard />
+                  </PrivateRoute>
+                }
+              />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </Box>
+          <Footer />
+        </Flex>
+      </Router>
+    </ChakraProvider>
+  );
 }
 
-export default App
+export default App;
