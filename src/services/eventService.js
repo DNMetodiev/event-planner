@@ -1,26 +1,22 @@
 import { getFirestore, collection, getDocs, addDoc } from 'firebase/firestore';
 import { app } from '../firebase-config';
-import { uploadImageToStorage } from '../services/firebaseStorageService';
 
 const db = getFirestore(app);
 
+// Function to fetch events from Firestore
 export const getEvents = async () => {
   const eventsCol = collection(db, 'events');
   const eventSnapshot = await getDocs(eventsCol);
-  const eventList = eventSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  const eventList = eventSnapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
   return eventList;
 };
 
+// Function to add a new event to Firestore
 export const addEvent = async (eventData) => {
   const eventsCol = collection(db, 'events');
   const docRef = await addDoc(eventsCol, eventData);
-  return docRef.id;
-};
-
-export const uploadEventImage = async (imageFile) => {
-  if (!imageFile) {
-    throw new Error("No image file provided.");
-  }
-
-  return uploadImageToStorage(imageFile);
+  return docRef.id; // Returns the newly created document's ID
 };

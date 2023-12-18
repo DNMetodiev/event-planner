@@ -1,32 +1,25 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, FormControl, FormLabel, Input, Button, Textarea, useToast } from '@chakra-ui/react';
-import { uploadEventImage, addEvent } from '../../services/eventService';
+import { addEvent } from '../../services/eventService';
 
 const CreateEventForm = () => {
   const [eventData, setEventData] = useState({
     name: '',
     description: '',
-    price: '',
-    image: null
+    price: ''
   });
   const toast = useToast();
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     setEventData({ ...eventData, [e.target.name]: e.target.value });
   };
 
-  const handleImageChange = (e) => {
-    setEventData({ ...eventData, image: e.target.files[0] });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let imageUrl = '';
-      if (eventData.image) {
-        imageUrl = await uploadEventImage(eventData.image);
-      }
-      await addEvent({ ...eventData, imageUrl });
+      await addEvent(eventData);
       toast({
         title: 'Event created.',
         description: 'The event has been successfully created.',
@@ -34,6 +27,14 @@ const CreateEventForm = () => {
         duration: 5000,
         isClosable: true,
       });
+
+      setEventData({
+        name: '',
+        description: '',
+        price: ''
+      });
+
+      navigate('/');
     } catch (error) {
       toast({
         title: 'Error creating event.',
@@ -59,10 +60,6 @@ const CreateEventForm = () => {
         <FormControl isRequired mt={4}>
           <FormLabel>Price</FormLabel>
           <Input type="number" name="price" value={eventData.price} onChange={handleInputChange} />
-        </FormControl>
-        <FormControl mt={4}>
-          <FormLabel>Event Image</FormLabel>
-          <Input type="file" name="image" onChange={handleImageChange} />
         </FormControl>
         <Button mt={4} colorScheme="blue" type="submit">Create Event</Button>
       </form>
