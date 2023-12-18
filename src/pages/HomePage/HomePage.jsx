@@ -46,6 +46,10 @@ const HomePage = () => {
     navigate('/create-event');
   };
 
+  const navigateToDetailedEvent = (eventId) => {
+    navigate(`/events/${eventId}`);
+  };
+
   return (
     <>
       <Box className="hero-section">
@@ -64,9 +68,9 @@ const HomePage = () => {
           </Button>
         )}
         <SimpleGrid columns={[1, null, 3]} spacing="40px" mb="6">
-          {events.map((event, index) => (
-            <ScaleFade key={index} in={true} initialScale={0.9}>
-              <Box p="5" shadow="md" borderWidth="1px">
+          {events.map((event) => (
+            <ScaleFade key={event.id} in={true} initialScale={0.9}>
+              <Box p="5" shadow="md" borderWidth="1px" onClick={() => navigateToDetailedEvent(event.id)} cursor="pointer">
                 <Heading as="h3" size="md">{event.name}</Heading>
                 <Text mt={4}>{event.description}</Text>
               </Box>

@@ -36,6 +36,10 @@ export const getUserRole = async (userId) => {
   }
 };
 
+export const getCurrentUser = () => {
+  const auth = getAuth();
+  return auth.currentUser;
+};
 
 export const onAuthChange = (callback) => {
   return onAuthStateChanged(auth, callback);

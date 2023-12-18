@@ -9,7 +9,8 @@ import AuthForm from '../src/components/AuthForm/AuthForm';
 import AdminDashboard from '../src/components/AdminDashoard/AdminDashboard';
 import UserDashboard from '../src/components/UserDashboard/UserDashboard';
 import CreateEventForm from '../src/components/CreateEventForm/CreateEventForm';
-import AboutUs from '../src/AboutUs/AboutUs'; // Add this line
+import AboutUs from '../src/AboutUs/AboutUs';
+import DetailedEvent from '../src/DetailedEvent/DetailedEvent';
 import './App.css';
 
 function App() {
@@ -48,7 +49,8 @@ function App() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<AuthForm />} />
-              <Route path="/about" element={<AboutUs />} /> {/* Add this line */}
+              <Route path="/events/:eventId" element={<DetailedEvent userId={user?.uid} />} />
+              <Route path="/about" element={<AboutUs />} />
               {user && role === 'admin' && (
                 <Route path="/create-event" element={<CreateEventForm />} />
               )}
