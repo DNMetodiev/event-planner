@@ -1,26 +1,37 @@
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "firebase/auth";
-import '../firebase-config'
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { app } from '../firebase-config'
 
-const auth = getAuth();
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-const register = (email, password) => {
-  return createUserWithEmailAndPassword(auth, email, password);
+export const register = async (email, password, role = 'user') => {
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
+  await setDoc(doc(db, "users", user.uid), { email, role });
+  return user;
 };
 
-const login = (email, password) => {
+export const login = (email, password) => {
   return signInWithEmailAndPassword(auth, email, password);
 };
 
-const logout = () => {
+export const logout = () => {
   return signOut(auth);
 };
 
-const getCurrentUser = () => {
-  return auth.currentUser;
+export const getUserRole = async (userId) => {
+  const docRef = doc(db, "users", userId);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    return docSnap.data().role;
+  } else {
+    console.log("No such document!");
+    return null;
+  }
 };
 
-const onAuthChange = (callback) => {
-  onAuthStateChanged(auth, callback);
+export const onAuthChange = (callback) => {
+  return onAuthStateChanged(auth, callback);
 };
-
-export { register, login, logout, getCurrentUser, onAuthChange };

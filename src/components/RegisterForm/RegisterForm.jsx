@@ -1,17 +1,31 @@
 import { useState } from 'react';
-import { Box, FormControl, FormLabel, Input, Button } from '@chakra-ui/react';
-import { register } from '../../services/authService'; // Assume you have this function implemented
+import { Box, FormControl, FormLabel, Input, Button, useToast } from '@chakra-ui/react';
+import { register } from '../../services/authService';
 
 const RegisterForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const toast = useToast();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
       await register(email, password);
+      toast({
+        title: "Account created.",
+        description: "You have successfully registered. You can now log in.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
     } catch (error) {
-      console.error("Registration failed: ", error);
+      toast({
+        title: "An error occurred.",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   };
 
@@ -20,11 +34,11 @@ const RegisterForm = () => {
       <form onSubmit={handleSubmit}>
         <FormControl isRequired>
           <FormLabel>Email</FormLabel>
-          <Input type="email" placeholder="Enter your email" onChange={(e) => setEmail(e.target.value)} />
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" />
         </FormControl>
         <FormControl isRequired mt={6}>
           <FormLabel>Password</FormLabel>
-          <Input type="password" placeholder="Enter your password" onChange={(e) => setPassword(e.target.value)} />
+          <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" />
         </FormControl>
         <Button width="full" mt={4} type="submit">
           Register

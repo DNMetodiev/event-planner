@@ -1,58 +1,58 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ChakraProvider, Flex, Box } from '@chakra-ui/react';
-import { onAuthChange } from '../src/services/authService';
+import { onAuthChange, getUserRole } from '../src/services/authService';
 import Navbar from '../src/components/Navbar/Navbar';
 import Footer from '../src/components/Footer/Footer';
 import HomePage from '../src/pages/HomePage/HomePage';
 import AuthForm from '../src/components/AuthForm/AuthForm';
 import AdminDashboard from '../src/components/AdminDashoard/AdminDashboard';
 import UserDashboard from '../src/components/UserDashboard/UserDashboard';
+import CreateEventForm from '../src/components/CreateEventForm/CreateEventForm';
 import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState('');
 
   useEffect(() => {
-    const unsubscribe = onAuthChange((authUser) => {
+    const unsubscribe = onAuthChange(async (authUser) => {
       if (authUser) {
-        setUser(authUser);
+        try {
+          const userRole = await getUserRole(authUser.uid);
+          setRole(userRole);
+          setUser(authUser);
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+        }
       } else {
         setUser(null);
+        setRole('');
       }
     });
-    return unsubscribe;
-  }, []);
 
-  const PrivateRoute = ({ children, allowedRoles }) => {
-    return user && allowedRoles.includes(user.role) ? children : <Navigate to="/login" />;
-  };
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, []);
 
   return (
     <ChakraProvider>
       <Router>
+        <Navbar />
         <Flex direction="column" minHeight="100vh" width="100%">
-          <Navbar />
           <Box flex="1">
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<AuthForm />} />
-              <Route
-                path="/admin"
-                element={
-                  <PrivateRoute allowedRoles={['admin']}>
-                    <AdminDashboard />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/dashboard"
-                element={
-                  <PrivateRoute allowedRoles={['user', 'admin']}>
-                    <UserDashboard />
-                  </PrivateRoute>
-                }
-              />
+              {user && role === 'admin' && (
+                <Route path="/create-event" element={<CreateEventForm />} />
+              )}
+              {user && (
+                <Route path="/dashboard" element={role === 'admin' ? <AdminDashboard /> : <UserDashboard />} />
+              )}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </Box>
