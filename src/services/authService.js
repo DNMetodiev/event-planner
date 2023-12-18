@@ -16,22 +16,28 @@ export const login = (email, password) => {
   return signInWithEmailAndPassword(auth, email, password);
 };
 
-export const logout = () => {
+export const signOutUser = () => {
   return signOut(auth);
 };
 
 export const getUserRole = async (userId) => {
-  const docRef = doc(db, "users", userId);
-  const docSnap = await getDoc(docRef);
-
-  if (docSnap.exists()) {
-    return docSnap.data().role;
-  } else {
-    console.log("No such document!");
-    return null;
+  const userRef = doc(db, "users", userId);
+  try {
+    const userDoc = await getDoc(userRef);
+    if (userDoc.exists()) {
+      return userDoc.data().role;
+    } else {
+      console.log("No such user document!");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching user role:", error);
+    throw error;
   }
 };
+
 
 export const onAuthChange = (callback) => {
   return onAuthStateChanged(auth, callback);
 };
+
