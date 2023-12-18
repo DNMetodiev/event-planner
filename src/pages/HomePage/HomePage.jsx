@@ -27,11 +27,7 @@ const HomePage = () => {
       }
     });
 
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
+    return () => unsubscribe && unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -51,31 +47,34 @@ const HomePage = () => {
   };
 
   return (
-    <Container maxW="container.xl" centerContent>
-      <Heading as="h1" size="xl" mt="6">
-        Welcome to Event Planner!
-      </Heading>
-      <Text fontSize="md" my="4">
-        Find and manage events with ease.
-      </Text>
-
-      {role === 'admin' && (
-        <Button colorScheme="blue" onClick={navigateToCreateEvent} my="4">
-          Create Event
-        </Button>
-      )}
-
-      <SimpleGrid columns={[1, null, 3]} spacing="40px" mb="6">
-        {events.map((event, index) => (
-          <ScaleFade key={index} in={true} initialScale={0.9}>
-            <Box p="5" shadow="md" borderWidth="1px">
-              <Heading as="h3" size="md">{event.name}</Heading>
-              <Text mt={4}>{event.description}</Text>
-            </Box>
-          </ScaleFade>
-        ))}
-      </SimpleGrid>
-    </Container>
+    <>
+      <Box className="hero-section">
+        <Heading as="h1" size="2xl" color="white" textAlign="center" className="hero-heading">Welcome to Event Planner!</Heading>
+      </Box>
+      <Container maxW="container.xl" centerContent>
+        <Heading as="h2" size="lg" mt="6">
+          Featured Events
+        </Heading>
+        <Text fontSize="md" my="4">
+          Find and manage events with ease.
+        </Text>
+        {role === 'admin' && (
+          <Button colorScheme="blue" onClick={navigateToCreateEvent} my="4">
+            Create Event
+          </Button>
+        )}
+        <SimpleGrid columns={[1, null, 3]} spacing="40px" mb="6">
+          {events.map((event, index) => (
+            <ScaleFade key={index} in={true} initialScale={0.9}>
+              <Box p="5" shadow="md" borderWidth="1px">
+                <Heading as="h3" size="md">{event.name}</Heading>
+                <Text mt={4}>{event.description}</Text>
+              </Box>
+            </ScaleFade>
+          ))}
+        </SimpleGrid>
+      </Container>
+    </>
   );
 };
 

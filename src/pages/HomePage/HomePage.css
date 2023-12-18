@@ -1,0 +1,15 @@
+.hero-section {
+  background-image: url('../../assets/hero-image.png');
+  height: 500px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%); 
+}
+
+.hero-heading {
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7); 
+}
