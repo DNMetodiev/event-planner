@@ -13,35 +13,23 @@ const Navbar = () => {
   useEffect(() => {
     const unsubscribe = onAuthChange(async (authUser) => {
       if (authUser) {
-        try {
-          const fetchedRole = await getUserRole(authUser.uid);
-          setRole(fetchedRole);
-          setUser(authUser);
-        } catch (error) {
-          console.error("Error fetching user role:", error);
-        }
+        const fetchedRole = await getUserRole(authUser.uid);
+        setRole(fetchedRole);
+        setUser(authUser);
       } else {
         setUser(null);
         setRole('');
       }
     });
 
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
+    return () => unsubscribe?.();
   }, []);
 
   const handleSignOut = async () => {
-    try {
-      await signOutUser();
-      setUser(null);
-      setRole('');
-      navigate('/login');
-    } catch (error) {
-      console.error('Error signing out: ', error);
-    }
+    await signOutUser();
+    setUser(null);
+    setRole('');
+    navigate('/login');
   };
 
   return (
@@ -56,22 +44,17 @@ const Navbar = () => {
             <MenuList>
               {location.pathname !== '/' && <MenuItem onClick={() => navigate('/')}>Home</MenuItem>}
               {location.pathname !== '/about' && <MenuItem onClick={() => navigate('/about')}>About</MenuItem>}
-              {user && (
+              {user && <MenuItem isDisabled>{user.email}</MenuItem>}
+              {user && role === 'admin' && (
                 <>
-                  {role === 'admin' && location.pathname !== '/admin-dashboard' && (
-                    <MenuItem onClick={() => navigate('/admin-dashboard')}>Admin Dashboard</MenuItem>
-                  )}
-                  <MenuItem isDisabled>{user.email}</MenuItem>
-                  {role === 'admin' && <MenuItem isDisabled>Role: Admin</MenuItem>}
-                  <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>
+                  <MenuItem isDisabled>Role: Admin</MenuItem>
+                  <MenuItem onClick={() => navigate('/admin-dashboard')}>Admin Dashboard</MenuItem>
                 </>
               )}
-              {!user && (
-                <>
-                  {location.pathname !== '/login' && <MenuItem onClick={() => navigate('/login')}>Sign In</MenuItem>}
-                  {location.pathname !== '/register' && <MenuItem onClick={() => navigate('/register')}>Register</MenuItem>}
-                </>
-              )}
+              {user && role === 'user' && <MenuItem onClick={() => navigate('/user-dashboard')}>Activity</MenuItem>}
+              {user && <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>}
+              {!user && location.pathname !== '/login' && <MenuItem onClick={() => navigate('/login')}>Sign In</MenuItem>}
+              {!user && location.pathname !== '/register' && <MenuItem onClick={() => navigate('/register')}>Register</MenuItem>}
             </MenuList>
           </Menu>
         </Flex>

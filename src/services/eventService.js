@@ -1,4 +1,4 @@
-import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, arrayUnion, increment } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, arrayUnion, increment, query, where } from 'firebase/firestore';
 
 import { app } from '../firebase-config';
 
@@ -7,11 +7,10 @@ const db = getFirestore(app);
 export const getEvents = async () => {
   const eventsCol = collection(db, 'events');
   const eventSnapshot = await getDocs(eventsCol);
-  const eventList = eventSnapshot.docs.map((docSnapshot) => ({
+  return eventSnapshot.docs.map(docSnapshot => ({
     id: docSnapshot.id,
     ...docSnapshot.data()
   }));
-  return eventList;
 };
 
 export const addEvent = async (eventData) => {
@@ -40,24 +39,18 @@ export const likeEvent = async (eventId) => {
 export const getEventComments = async (eventId) => {
   const commentsRef = collection(db, 'events', eventId, 'comments');
   const querySnapshot = await getDocs(commentsRef);
-
-  const commentsWithUser = await Promise.all(querySnapshot.docs.map(async (docSnapshot) => {
+  return Promise.all(querySnapshot.docs.map(async (docSnapshot) => {
     const commentData = docSnapshot.data();
     const userRef = doc(db, 'users', commentData.userId);
     const userSnap = await getDoc(userRef);
-
-    const createdAt = commentData.createdAt ? commentData.createdAt.toDate() : new Date();
-
     return {
       id: docSnapshot.id,
       text: commentData.text,
       userName: userSnap.exists() ? userSnap.data().name : "Anonymous",
-      createdAt,
+      createdAt: commentData.createdAt.toDate(),
       ...commentData
     };
   }));
-
-  return commentsWithUser;
 };
 
 export const addCommentToEvent = async (eventId, { userId, comment }) => {
@@ -76,4 +69,31 @@ export const buyEvent = async (eventId, userId) => {
   await updateDoc(eventRef, {
     buyers: arrayUnion(userId)
   });
+};
+
+export const getUserInteractions = async (userId) => {
+  const likedEvents = [];
+  const commentedEvents = [];
+
+  const likedEventsQuery = query(collection(db, 'events'), where('likes', 'array-contains', userId));
+  const likedEventsSnapshot = await getDocs(likedEventsQuery);
+  likedEventsSnapshot.forEach(doc => {
+    likedEvents.push({ id: doc.id, ...doc.data() });
+  });
+
+  const eventsSnapshot = await getDocs(collection(db, 'events'));
+  await Promise.all(eventsSnapshot.docs.map(async (eventDoc) => {
+    const commentsSnapshot = await getDocs(collection(db, 'events', eventDoc.id, 'comments'));
+    let commented = false;
+    commentsSnapshot.forEach(commentDoc => {
+      if (commentDoc.data().userId === userId) {
+        commented = true;
+      }
+    });
+    if (commented) {
+      commentedEvents.push({ id: eventDoc.id, ...eventDoc.data() });
+    }
+  }));
+
+  return { likedEvents, commentedEvents };
 };

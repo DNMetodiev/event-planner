@@ -51,6 +51,8 @@ function App() {
               <Route path="/login" element={<AuthForm />} />
               <Route path="/events/:eventId" element={<DetailedEvent userId={user?.uid} />} />
               <Route path="/about" element={<AboutUs />} />
+              <Route path="/admin-dashboard" element={<AdminDashboard />} />
+              <Route path="/user-dashboard" element={<UserDashboard />} />
               {user && role === 'admin' && (
                 <Route path="/create-event" element={<CreateEventForm />} />
               )}
