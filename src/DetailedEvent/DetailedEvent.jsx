@@ -41,6 +41,11 @@ const DetailedEvent = () => {
   }, [eventId]);
 
   const handleLike = async () => {
+    if (!currentUser) {
+      console.error("User not logged in");
+      navigate('/login');
+      return;
+    }
     try {
       await likeEvent(eventId);
       setEvent({ ...event, likes: (event.likes || 0) + 1 });
