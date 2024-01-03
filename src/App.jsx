@@ -11,6 +11,7 @@ import UserDashboard from '../src/components/UserDashboard/UserDashboard';
 import CreateEventForm from '../src/components/CreateEventForm/CreateEventForm';
 import AboutUs from '../src/AboutUs/AboutUs';
 import DetailedEvent from '../src/DetailedEvent/DetailedEvent';
+import EditEventForm from './components/EditEventForm/EditEventForm';
 import './App.css';
 
 function App() {
@@ -54,10 +55,10 @@ function App() {
               <Route path="/admin-dashboard" element={<AdminDashboard />} />
               <Route path="/user-dashboard" element={<UserDashboard />} />
               {user && role === 'admin' && (
-                <Route path="/create-event" element={<CreateEventForm />} />
-              )}
-              {user && (
-                <Route path="/dashboard" element={role === 'admin' ? <AdminDashboard /> : <UserDashboard />} />
+                <>
+                  <Route path="/create-event" element={<CreateEventForm />} />
+                  <Route path="/edit-event/:eventId" element={<EditEventForm />} />
+                </>
               )}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
@@ -68,6 +69,5 @@ function App() {
     </ChakraProvider>
   );
 }
-
 
 export default App;

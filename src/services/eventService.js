@@ -1,4 +1,4 @@
-import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, arrayUnion, increment, query, where } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, arrayUnion, increment, deleteDoc, query, where } from 'firebase/firestore';
 
 import { app } from '../firebase-config';
 
@@ -27,6 +27,16 @@ export const getEventById = async (eventId) => {
   } else {
     throw new Error('No such document!');
   }
+};
+
+export const updateEvent = async (eventId, eventData) => {
+  const eventRef = doc(db, 'events', eventId);
+  await updateDoc(eventRef, eventData);
+};
+
+export const deleteEvent = async (eventId) => {
+  const eventRef = doc(db, 'events', eventId);
+  await deleteDoc(eventRef);
 };
 
 export const likeEvent = async (eventId) => {
